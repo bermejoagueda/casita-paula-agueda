@@ -153,16 +153,16 @@ export default function App() {
               ))}
             </div>
             <span style={{ fontSize:15, fontWeight:600 }}>{MONTHS[month]} {year}</span>
-<div />
+            <div />
           </div>
         )}
 
         {loading ? <LoadingScreen /> : (
           <>
-              {tab==='dashboard' && <>
+            {tab==='dashboard' && <>
               <ContextualMessage transactions={txs} budgets={budgets} month={month} year={year} />
+              <BoteSummaryCard recurring={recurring} exchangeRate={exchangeRate} boteSettings={boteSettings} transactions={txs} onNavigate={() => setTab('bote')} />
               <SummaryCards transactions={txs} />
-              <MonthlyChart summary={summary} year={year} />
               {ST('Categorías del mes')}
               <CategoryBars transactions={txs} budgets={budgets} />
             </>}
@@ -189,6 +189,11 @@ export default function App() {
               <SavingsBox savings={savings} onUpdate={handleUpdateSavings} />
             </>}
 
+            {tab==='bote' && <>
+              {ST('Bote común')}
+              <BoteView recurring={recurring} exchangeRate={exchangeRate} transactions={txs} />
+            </>}
+
             {tab==='compra' && <>
               {ST('Lista de la compra')}
               <ShoppingView items={shopping} onAdd={handleAddShop} onUpdate={handleUpdateShop} onDelete={handleDeleteShop} onClearChecked={handleClearChecked} />
@@ -197,11 +202,6 @@ export default function App() {
             {tab==='wishlist' && <>
               {ST('Wishlist del hogar')}
               <WishlistView items={wishlist} onAdd={handleAddWish} onUpdate={handleUpdateWish} onDelete={handleDeleteWish} />
-            </>}
-
-            {tab==='bote' && <>
-              {ST('Bote común')}
-              <BoteView recurring={recurring} exchangeRate={exchangeRate} transactions={txs} />
             </>}
 
             {tab==='viajes' && <>
