@@ -117,12 +117,17 @@ async function initDB() {
 
   await pool.query(`ALTER TABLE transactions ADD COLUMN IF NOT EXISTS amount_eur NUMERIC(10,2)`).catch(() => {});
   await pool.query(`ALTER TABLE transactions ADD COLUMN IF NOT EXISTS amount_orig NUMERIC(10,2)`).catch(() => {});
-  await pool.query(`ALTER TABLE transactions ADD COLUMN IF NOT EXISTS currency TEXT NOT NULL DEFAULT 'EUR'`).catch(() => {});
+  await pool.query(`ALTER TABLE transactions ADD COLUMN IF NOT EXISTS currency TEXT DEFAULT 'EUR'`).catch(() => {});
   await pool.query(`ALTER TABLE transactions ADD COLUMN IF NOT EXISTS exchange_rate NUMERIC(10,4)`).catch(() => {});
-  await pool.query(`ALTER TABLE transactions ADD COLUMN IF NOT EXISTS person TEXT NOT NULL DEFAULT 'ambas'`).catch(() => {});
+  await pool.query(`ALTER TABLE transactions ADD COLUMN IF NOT EXISTS person TEXT DEFAULT 'ambas'`).catch(() => {});
   await pool.query(`ALTER TABLE transactions ADD COLUMN IF NOT EXISTS notes TEXT DEFAULT ''`).catch(() => {});
   await pool.query(`UPDATE transactions SET amount_eur = amount WHERE amount_eur IS NULL`).catch(() => {});
-  await pool.query(`ALTER TABLE recurring ADD COLUMN IF NOT EXISTS currency TEXT NOT NULL DEFAULT 'EUR'`).catch(() => {});
+  await pool.query(`UPDATE transactions SET amount_eur = amount WHERE amount_eur IS NULL AND amount IS NOT NULL`).catch(() => {});
+  await pool.query(`UPDATE transactions SET amount_orig = amount_eur WHERE amount_orig IS NULL`).catch(() => {});
+  await pool.query(`UPDATE transactions SET currency = 'EUR' WHERE currency IS NULL`).catch(() => {});
+  await pool.query(`UPDATE transactions SET person = 'ambas' WHERE person IS NULL`).catch(() => {});
+  await pool.query(`UPDATE transactions SET notes = '' WHERE notes IS NULL`).catch(() => {});
+  await pool.query(`ALTER TABLE recurring ADD COLUMN IF NOT EXISTS currency TEXT DEFAULT 'EUR'`).catch(() => {});
 
   const { rowCount } = await pool.query('SELECT 1 FROM budgets LIMIT 1');
   if (rowCount === 0) {
