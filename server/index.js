@@ -182,6 +182,7 @@ async function initDB() {
       ('Plantas decorativas',80,'baja','salon','agueda')`);
   }
 
+  await pool.query(`CREATE TABLE IF NOT EXISTS bote_settings (key TEXT PRIMARY KEY, value TEXT NOT NULL)`).catch(() => {});
   console.log('DB lista');
 }
 
@@ -468,13 +469,8 @@ app.get('/api/annual/:year', async (req, res) => {
 // Bote settings (incomes for proportional split)
 app.get('/api/bote-settings', async (req, res) => {
   try {
-    const { rows } = await pool.query(`
-      CREATE TABLE IF NOT EXISTS bote_settings (
-        key   TEXT PRIMARY KEY,
-        value TEXT NOT NULL
-      );
-      SELECT * FROM bote_settings
-    `);
+    await pool.query(`CREATE TABLE IF NOT EXISTS bote_settings (key TEXT PRIMARY KEY, value TEXT NOT NULL)`);
+    const { rows } = await pool.query('SELECT * FROM bote_settings');
     const settings = {};
     rows.forEach(r => { settings[r.key] = r.value; });
     res.json(settings);
@@ -483,12 +479,7 @@ app.get('/api/bote-settings', async (req, res) => {
 
 app.put('/api/bote-settings', async (req, res) => {
   try {
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS bote_settings (
-        key   TEXT PRIMARY KEY,
-        value TEXT NOT NULL
-      )
-    `);
+    await pool.query(`CREATE TABLE IF NOT EXISTS bote_settings (key TEXT PRIMARY KEY, value TEXT NOT NULL)`);
     const entries = Object.entries(req.body);
     for (const [key, value] of entries) {
       await pool.query(

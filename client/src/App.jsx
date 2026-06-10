@@ -19,6 +19,7 @@ import ShoppingView from './components/ShoppingView'
 import WishlistView from './components/WishlistView'
 import TripsView from './components/TripsView'
 import BoteView from './components/BoteView'
+import BoteSummaryCard from './components/BoteSummaryCard'
 import { useToast } from './hooks/useToast'
 import { MONTHS } from './constants'
 import { api } from './api'
@@ -57,7 +58,6 @@ export default function App() {
   const [exchangeRate, setExchangeRate] = useState(null)
   const [rateUpdatedAt, setRateUpdatedAt] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [showBudgets, setShowBudgets] = useState(false)
   const [tab, setTab]         = useState('dashboard')
   const [filters, setFilters] = useState({})
   const { toasts, showToast, removeToast } = useToast()
@@ -68,16 +68,17 @@ export default function App() {
     setLoading(true)
     try {
       const txFilters = { year, month: month+1, ...filters }
-      const [txData, budgetData, savingsData, summaryData, annualData, recurringData, rateData, shopData, wishData, tripData] = await Promise.all([
+      const [txData, budgetData, savingsData, summaryData, annualData, recurringData, rateData, shopData, wishData, tripData, boteData] = await Promise.all([
         api.getTransactions(txFilters), api.getBudgets(), api.getSavings(year, month+1),
         api.getMonthlySummary(year), api.getAnnual(year), api.getRecurring(),
         api.getExchangeRate(), api.getShopping(), api.getWishlist(), api.getTrips(),
+        api.getBoteSettings(),
       ])
       setTxs(txData)
       const map = {}; budgetData.forEach(b => { map[b.cat] = Number(b.amount) }); setBudgets(map)
       setSavings(savingsData); setSummary(summaryData); setAnnual(annualData)
       setRecurring(recurringData); setExchangeRate(rateData.rate); setRateUpdatedAt(rateData.updatedAt)
-      setShopping(shopData); setWishlist(wishData); setTrips(tripData)
+      setShopping(shopData); setWishlist(wishData); setTrips(tripData); setBoteSettings(boteData)
     } catch { showToast('Error cargando datos','error') }
     finally { setLoading(false) }
   }, [year, month, filters])
@@ -163,9 +164,7 @@ export default function App() {
 
         {loading ? <LoadingScreen /> : (
           <>
-            {showBudgets && ['dashboard','movimientos','fijos','anual','ahorro'].includes(tab) && <BudgetEditor budgets={budgets} onUpdate={handleUpdateBudget} />}
-
-            {tab==='dashboard' && <>
+              {tab==='dashboard' && <>
               <ContextualMessage transactions={txs} budgets={budgets} month={month} year={year} />
               <SummaryCards transactions={txs} />
               <MonthlyChart summary={summary} year={year} />

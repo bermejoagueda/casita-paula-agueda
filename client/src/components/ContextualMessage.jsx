@@ -30,16 +30,14 @@ export default function ContextualMessage({ transactions, budgets, month, year }
   }
 
   if (mxnCount > 0 && isCurrentMonth) {
-    return <MessageCard msg={`${mxnCount} gasto${mxnCount > 1 ? 's' : ''} en MXN convertido${mxnCount > 1 ? 's' : ''} a EUR automáticamente 🇲🇽↔🇪🇺`} color="#FDF2F6" textColor="#993556" />
+    return <MessageCard msg={`${mxnCount} gasto${mxnCount > 1 ? 's' : ''} en MXN convertido${mxnCount > 1 ? 's' : ''} automáticamente 🇲🇽↔🇪🇺`} color="#FDF2F6" textColor="#993556" />
   }
 
-  if (isCurrentMonth && balance > 0) {
+  if (isCurrentMonth && totalExp > 0) {
     const daysLeft = new Date(year, month + 1, 0).getDate() - now.getDate()
-    if (daysLeft <= 5) return <MessageCard msg={`¡Últimos ${daysLeft} días y vais genial! 🎉 Balance: +€${balance.toFixed(0)}`} color="#EAF3DE" textColor="#3B6D11" />
-    return <MessageCard msg={`Vais bien este mes 💚 Balance positivo de €${balance.toFixed(0)}`} color="#EAF3DE" textColor="#3B6D11" />
+    if (daysLeft <= 5) return <MessageCard msg={`¡Últimos ${daysLeft} días del mes · €${totalExp.toFixed(0)} gastados`} color="#FAEEDA" textColor="#854F0B" />
+    return <MessageCard msg={`€${totalExp.toFixed(0)} gastados este mes 💚`} color="#EAF3DE" textColor="#3B6D11" />
   }
-
-  if (balance < 0) return <MessageCard msg={`Este mes los gastos superan los ingresos en €${Math.abs(balance).toFixed(0)} 📉`} color="#FCEBEB" textColor="#A32D2D" />
   return <MessageCard msg="Todo controlado por ahora 🏠✨" color="#FDF2F6" textColor="#993556" />
 }
 

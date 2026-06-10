@@ -1,37 +1,23 @@
 import React from 'react'
 
 export default function SummaryCards({ transactions }) {
-  const income  = transactions.filter(t => t.type === 'income').reduce((a, t) => a + Number(t.amount_eur), 0)
-  const expense = transactions.filter(t => t.type === 'expense').reduce((a, t) => a + Number(t.amount_eur), 0)
-  const balance = income - expense
-
-  const mxnExpense = transactions.filter(t => t.type === 'expense' && t.currency === 'MXN').reduce((a, t) => a + Number(t.amount_orig), 0)
-  const eurExpense = transactions.filter(t => t.type === 'expense' && t.currency !== 'MXN').reduce((a, t) => a + Number(t.amount_eur), 0)
-
-  const fmt = n => '€' + Math.abs(n).toLocaleString('es-ES', { minimumFractionDigits: 0 })
+  const expense = transactions.filter(t => t.type === 'expense').reduce((a, t) => a + Number(t.amount_eur || t.amount || 0), 0)
+  const mxnExp  = transactions.filter(t => t.type === 'expense' && t.currency === 'MXN').reduce((a, t) => a + Number(t.amount_orig || 0), 0)
+  const eurExp  = transactions.filter(t => t.type === 'expense' && t.currency !== 'MXN').reduce((a, t) => a + Number(t.amount_eur || t.amount || 0), 0)
+  const count   = transactions.filter(t => t.type === 'expense').length
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 10, marginBottom: '1.25rem' }}>
-      <div style={{ background: '#fff', border: '0.5px solid #D3D1C7', borderRadius: 12, padding: '0.9rem 1rem' }}>
-        <div style={{ fontSize: 12, color: '#888780', marginBottom: 4 }}>💰 Ingresos</div>
-        <div style={{ fontSize: 22, fontWeight: 600, color: '#3B6D11' }}>{fmt(income)}</div>
-        <div style={{ fontSize: 11, color: '#B4B2A9', marginTop: 2 }}>{transactions.filter(t=>t.type==='income').length} movimientos</div>
+    <div style={{ background: '#fff', border: '0.5px solid #D3D1C7', borderRadius: 14, padding: '1.1rem 1.25rem', marginBottom: '1.25rem' }}>
+      <div style={{ fontSize: 12, color: '#888780', marginBottom: 6 }}>💸 Gastos del mes</div>
+      <div style={{ fontSize: 32, fontWeight: 700, color: '#993556' }}>
+        €{expense.toLocaleString('es-ES', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
       </div>
-      <div style={{ background: '#fff', border: '0.5px solid #D3D1C7', borderRadius: 12, padding: '0.9rem 1rem' }}>
-        <div style={{ fontSize: 12, color: '#888780', marginBottom: 4 }}>💸 Gastos</div>
-        <div style={{ fontSize: 22, fontWeight: 600, color: '#993556' }}>{fmt(expense)}</div>
-        <div style={{ fontSize: 10, color: '#B4B2A9', marginTop: 2 }}>
-          {eurExpense > 0 && mxnExpense > 0 && `€${eurExpense.toFixed(0)} + $${Math.round(mxnExpense).toLocaleString('es-MX')} MXN`}
-          {eurExpense > 0 && mxnExpense === 0 && 'en EUR'}
-          {eurExpense === 0 && mxnExpense > 0 && 'en MXN'}
-        </div>
-      </div>
-      <div style={{ background: '#fff', border: '0.5px solid #D3D1C7', borderRadius: 12, padding: '0.9rem 1rem' }}>
-        <div style={{ fontSize: 12, color: '#888780', marginBottom: 4 }}>⚖️ Balance</div>
-        <div style={{ fontSize: 22, fontWeight: 600, color: balance >= 0 ? '#3B6D11' : '#993556' }}>
-          {(balance >= 0 ? '+' : '-')}{fmt(balance)}
-        </div>
-        <div style={{ fontSize: 11, color: '#B4B2A9', marginTop: 2 }}>{transactions.length} movimientos</div>
+      <div style={{ fontSize: 11, color: '#B4B2A9', marginTop: 4, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        {eurExp > 0 && mxnExp > 0 && <span>€{eurExp.toFixed(0)} + ${Math.round(mxnExp).toLocaleString('es-MX')} MXN</span>}
+        {eurExp > 0 && mxnExp === 0 && <span>en EUR</span>}
+        {eurExp === 0 && mxnExp > 0 && <span>en MXN</span>}
+        <span style={{ color: '#D3D1C7' }}>·</span>
+        <span>{count} movimiento{count !== 1 ? 's' : ''}</span>
       </div>
     </div>
   )
