@@ -156,19 +156,22 @@ export default function App() {
               ))}
             </div>
             <span style={{ fontSize:15, fontWeight:600 }}>{MONTHS[month]} {year}</span>
-            <div />
+<div />
           </div>
         )}
 
         {loading ? <LoadingScreen /> : (
           <>
-            {tab==='dashboard' && <>
+              {tab==='dashboard' && <>
               <ContextualMessage transactions={txs} budgets={budgets} month={month} year={year} />
               <SummaryCards transactions={txs} />
-              <BoteSummaryCard recurring={recurring} exchangeRate={exchangeRate} boteSettings={boteSettings} onNavigate={() => setTab('bote')} />
               <MonthlyChart summary={summary} year={year} />
               {ST('Categorías del mes')}
               <CategoryBars transactions={txs} budgets={budgets} />
+              {ST('Distribución')}
+              <SpendingChart transactions={txs} />
+              {ST('Split Paula & Águeda')}
+              <SplitView transactions={txs} />
             </>}
 
             {tab==='movimientos' && <>
@@ -194,11 +197,6 @@ export default function App() {
               <MonthlyChart summary={summary} year={year} />
             </>}
 
-            {tab==='bote' && <>
-              {ST('Bote común')}
-              <BoteView recurring={recurring} exchangeRate={exchangeRate} />
-            </>}
-
             {tab==='compra' && <>
               {ST('Lista de la compra')}
               <ShoppingView items={shopping} onAdd={handleAddShop} onUpdate={handleUpdateShop} onDelete={handleDeleteShop} onClearChecked={handleClearChecked} />
@@ -207,6 +205,11 @@ export default function App() {
             {tab==='wishlist' && <>
               {ST('Wishlist del hogar')}
               <WishlistView items={wishlist} onAdd={handleAddWish} onUpdate={handleUpdateWish} onDelete={handleDeleteWish} />
+            </>}
+
+            {tab==='bote' && <>
+              {ST('Bote común')}
+              <BoteView recurring={recurring} exchangeRate={exchangeRate} transactions={txs} />
             </>}
 
             {tab==='viajes' && <>
