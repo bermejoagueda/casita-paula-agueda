@@ -10,7 +10,6 @@ import SplitView from './components/SplitView'
 import SavingsBox from './components/SavingsBox'
 import AddForm from './components/AddForm'
 import TxList from './components/TxList'
-import BudgetEditor from './components/BudgetEditor'
 import RecurringView from './components/RecurringView'
 import ContextualMessage from './components/ContextualMessage'
 import LoadingScreen from './components/LoadingScreen'
@@ -94,7 +93,6 @@ export default function App() {
   const handleAdd    = async (data) => { await api.addTransaction(data); await loadData(); showToast(`✓ ${data.desc} añadido`,'success') }
   const handleDelete = async (id)   => { const tx=txs.find(t=>t.id===id); await api.deleteTransaction(id); setTxs(p=>p.filter(t=>t.id!==id)); showToast(`Eliminado: ${tx?.description}`,'info') }
   const handleEdit   = async (id,f) => { await api.updateTransaction(id,f); await loadData(); showToast('Cambios guardados','success') }
-  const handleUpdateBudget  = async (cat,amt) => { await api.updateBudget(cat,amt); setBudgets(p=>({...p,[cat]:amt})); showToast('Presupuesto actualizado','success') }
   const handleUpdateSavings = async (g,s) => { const u=await api.updateSavings(year,month+1,g,s); setSavings(u); showToast('Ahorro guardado','success') }
   const handleAddRecurring    = async (d)    => { await api.addRecurring(d); await loadData(); showToast('Gasto fijo añadido','success') }
   const handleUpdateRecurring = async (id,d) => { await api.updateRecurring(id,d); await loadData() }
@@ -158,22 +156,19 @@ export default function App() {
               ))}
             </div>
             <span style={{ fontSize:15, fontWeight:600 }}>{MONTHS[month]} {year}</span>
-            <button onClick={() => setShowBudgets(s=>!s)} style={{ background:showBudgets?'#F9D6E7':'#fff', border:`0.5px solid ${showBudgets?'#F2A8C8':'#D3D1C7'}`, borderRadius:9, padding:'4px 10px', cursor:'pointer', fontSize:11, color:showBudgets?'#993556':'#5F5E5A' }}>⚙️ Presupuestos</button>
+            <div />
           </div>
         )}
 
         {loading ? <LoadingScreen /> : (
           <>
-              {tab==='dashboard' && <>
+            {tab==='dashboard' && <>
               <ContextualMessage transactions={txs} budgets={budgets} month={month} year={year} />
               <SummaryCards transactions={txs} />
+              <BoteSummaryCard recurring={recurring} exchangeRate={exchangeRate} boteSettings={boteSettings} onNavigate={() => setTab('bote')} />
               <MonthlyChart summary={summary} year={year} />
               {ST('Categorías del mes')}
               <CategoryBars transactions={txs} budgets={budgets} />
-              {ST('Distribución')}
-              <SpendingChart transactions={txs} />
-              {ST('Split Paula & Águeda')}
-              <SplitView transactions={txs} />
             </>}
 
             {tab==='movimientos' && <>
@@ -199,6 +194,11 @@ export default function App() {
               <MonthlyChart summary={summary} year={year} />
             </>}
 
+            {tab==='bote' && <>
+              {ST('Bote común')}
+              <BoteView recurring={recurring} exchangeRate={exchangeRate} />
+            </>}
+
             {tab==='compra' && <>
               {ST('Lista de la compra')}
               <ShoppingView items={shopping} onAdd={handleAddShop} onUpdate={handleUpdateShop} onDelete={handleDeleteShop} onClearChecked={handleClearChecked} />
@@ -207,11 +207,6 @@ export default function App() {
             {tab==='wishlist' && <>
               {ST('Wishlist del hogar')}
               <WishlistView items={wishlist} onAdd={handleAddWish} onUpdate={handleUpdateWish} onDelete={handleDeleteWish} />
-            </>}
-
-            {tab==='bote' && <>
-              {ST('Bote común')}
-              <BoteView recurring={recurring} exchangeRate={exchangeRate} />
             </>}
 
             {tab==='viajes' && <>
