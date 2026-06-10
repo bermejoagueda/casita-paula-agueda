@@ -3,10 +3,7 @@ import PinLock from './components/PinLock'
 import Header from './components/Header'
 import SummaryCards from './components/SummaryCards'
 import CategoryBars from './components/CategoryBars'
-import SpendingChart from './components/SpendingChart'
-import MonthlyChart from './components/MonthlyChart'
 import AnnualView from './components/AnnualView'
-import SplitView from './components/SplitView'
 import SavingsBox from './components/SavingsBox'
 import AddForm from './components/AddForm'
 import TxList from './components/TxList'
@@ -168,10 +165,6 @@ export default function App() {
               <MonthlyChart summary={summary} year={year} />
               {ST('Categorías del mes')}
               <CategoryBars transactions={txs} budgets={budgets} />
-              {ST('Distribución')}
-              <SpendingChart transactions={txs} />
-              {ST('Split Paula & Águeda')}
-              <SplitView transactions={txs} />
             </>}
 
             {tab==='movimientos' && <>
@@ -194,7 +187,6 @@ export default function App() {
             {tab==='ahorro' && <>
               {ST('Ahorro mensual')}
               <SavingsBox savings={savings} onUpdate={handleUpdateSavings} />
-              <MonthlyChart summary={summary} year={year} />
             </>}
 
             {tab==='compra' && <>
