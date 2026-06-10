@@ -460,6 +460,28 @@ app.get('/api/annual/:year', async (req, res) => {
   } catch { res.status(500).json({ error: 'Error' }); }
 });
 
+
+// One-time migration endpoint
+app.post('/api/migrate', async (req, res) => {
+  try {
+    await pool.query(`ALTER TABLE transactions ADD COLUMN IF NOT EXISTS amount_eur NUMERIC(10,2)`).catch(() => {});
+    await pool.query(`ALTER TABLE transactions ADD COLUMN IF NOT EXISTS amount_orig NUMERIC(10,2)`).catch(() => {});
+    await pool.query(`ALTER TABLE transactions ADD COLUMN IF NOT EXISTS currency TEXT DEFAULT 'EUR'`).catch(() => {});
+    await pool.query(`ALTER TABLE transactions ADD COLUMN IF NOT EXISTS exchange_rate NUMERIC(10,4)`).catch(() => {});
+    await pool.query(`ALTER TABLE transactions ADD COLUMN IF NOT EXISTS person TEXT DEFAULT 'ambas'`).catch(() => {});
+    await pool.query(`ALTER TABLE transactions ADD COLUMN IF NOT EXISTS notes TEXT DEFAULT ''`).catch(() => {});
+    const r1 = await pool.query(`UPDATE transactions SET amount_eur = amount WHERE amount_eur IS NULL AND amount IS NOT NULL`);
+    const r2 = await pool.query(`UPDATE transactions SET amount_eur = amount_orig WHERE amount_eur IS NULL AND amount_orig IS NOT NULL`);
+    const r3 = await pool.query(`UPDATE transactions SET amount_orig = amount_eur WHERE amount_orig IS NULL`);
+    const r4 = await pool.query(`UPDATE transactions SET currency = 'EUR' WHERE currency IS NULL`);
+    const r5 = await pool.query(`UPDATE transactions SET person = 'ambas' WHERE person IS NULL`);
+    const r6 = await pool.query(`UPDATE transactions SET notes = '' WHERE notes IS NULL`);
+    res.json({ ok: true, updated: { amount_eur: r1.rowCount + r2.rowCount, currency: r4.rowCount, person: r5.rowCount } });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.get('/api/health', (_, res) => res.json({ status: 'ok' }));
 app.get('*', (_, res) => res.sendFile(path.join(__dirname, '../client/dist/index.html')));
 
